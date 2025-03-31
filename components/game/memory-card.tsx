@@ -52,7 +52,7 @@ export function MemoryCard({
   const cardGradient = customCardColor || themeColor;
 
   return (
-    <div className="relative w-full h-full" style={{ aspectRatio: '1 / 0.8' }}>
+    <div className="relative w-full overflow-hidden" style={{ aspectRatio: '0.9', maxHeight: 'calc(100vh / 5)' }}>
       <motion.div
         className="w-full h-full cursor-pointer"
         onClick={handleClick}
@@ -85,7 +85,7 @@ export function MemoryCard({
                   alt={card.alt || `${card.name} 圖片`} 
                   fill 
                   priority
-                  sizes="(max-width: 640px) 25vw, (max-width: 1024px) 20vw, 15vw"
+                  sizes="(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
                   className="object-contain"
                 />
               </div>

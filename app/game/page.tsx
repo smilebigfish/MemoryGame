@@ -39,31 +39,36 @@ export default function GamePage() {
 
   // 計算網格布局 - 根據難度調整列數
   const getGridCols = () => {
+    // 超簡單
     if (difficultyPairs <= 4) return "grid-cols-4"
+    // 簡單
     if (difficultyPairs <= 8) return "grid-cols-4 md:grid-cols-4"
-    if (difficultyPairs <= 10) return "grid-cols-4 md:grid-cols-5"
-    if (difficultyPairs <= 12) return "grid-cols-4 md:grid-cols-6"
-    if (difficultyPairs <= 15) return "grid-cols-5 md:grid-cols-6"
-    return "grid-cols-5 md:grid-cols-8"
+    // 中等
+    if (difficultyPairs <= 10) return "grid-cols-4 sm:grid-cols-5"
+    // 困難
+    if (difficultyPairs <= 12) return "grid-cols-4 sm:grid-cols-4 md:grid-cols-6"
+    // 專家
+    return "grid-cols-4 sm:grid-cols-5 lg:grid-cols-8"
   }
 
   // 計算卡片容器高度 - 根據難度調整
   const getContainerHeight = () => {
     if (difficultyPairs <= 4) return "h-[65vh] md:h-[70vh]"
-    if (difficultyPairs <= 8) return "h-[70vh] md:h-[75vh]"
-    if (difficultyPairs <= 12) return "h-[75vh] md:h-[78vh]"
-    if (difficultyPairs <= 15) return "h-[78vh] md:h-[80vh]"
-    return "h-[80vh] md:h-[85vh]"
+    if (difficultyPairs <= 8) return "h-auto min-h-[65vh] md:min-h-[70vh]" // 改為自適應高度
+    if (difficultyPairs <= 10) return "h-auto min-h-[70vh] md:min-h-[75vh]" // 改為自適應高度
+    if (difficultyPairs <= 12) return "h-auto min-h-[75vh] md:min-h-[78vh]" // 改為自適應高度
+    if (difficultyPairs <= 15) return "h-auto min-h-[75vh] md:min-h-[80vh]" // 改為自適應高度
+    return "h-auto min-h-[80vh] md:min-h-[85vh]" // 改為自適應高度
   }
 
   // 計算卡片大小 - 根據卡片數量調整縮放比例
   const getCardSize = () => {
-    if (difficultyPairs <= 4) return "transform-none"
+    if (difficultyPairs <= 4) return "transform-none" 
     if (difficultyPairs <= 8) return "transform-none"
     if (difficultyPairs <= 10) return "transform-none"
     if (difficultyPairs <= 12) return "transform-none md:scale-95"
-    if (difficultyPairs <= 15) return "scale-95 md:scale-90"
-    return "scale-95 md:scale-90"
+    if (difficultyPairs <= 15) return "transform-none sm:scale-95"
+    return "transform-none sm:scale-95 md:scale-90"
   }
 
   // 計算每行卡片數量 (用於計算行數)
@@ -82,6 +87,16 @@ export default function GamePage() {
     if (difficultyPairs <= 8) return "gap-3 md:gap-4"
     if (difficultyPairs <= 12) return "gap-2 md:gap-3"
     return "gap-1.5 md:gap-2"
+  }
+
+  // 根據難度限制容器最大寬度
+  const getContainerMaxWidth = () => {
+    // 對於『超簡單，簡單，中等』難度，限制最大寬度為1024px
+    if (selectedDifficulty <= 3) {
+      return "max-w-[95vw] sm:max-w-[90vw] md:max-w-screen-md"
+    }
+    // 對於更高難度，允許更寬的容器
+    return "max-w-[95vw] 2xl:max-w-[85vw]"
   }
 
   // 處理遊戲完成
@@ -108,7 +123,7 @@ export default function GamePage() {
         />
       )}
 
-      <div className="w-full max-w-[95vw] 2xl:max-w-[85vw] flex flex-col">
+      <div className={`w-full ${getContainerMaxWidth()} flex flex-col`}>
         <div className="flex flex-wrap justify-between items-center w-full gap-2 mb-1">
           <Button onClick={() => router.push("/")} className="rounded-full bg-[#FF6F61] hover:bg-[#FF5A4C] text-white px-2 py-0.5 h-7 text-xs sm:text-sm">
             ← 返回
@@ -153,8 +168,12 @@ export default function GamePage() {
           <div className="w-full h-6 mb-1"></div> // 空白佔位，保持佈局一致
         )}
 
-        <div className={`${getContainerHeight()} overflow-hidden flex items-center justify-center w-full`}>
-          <div className={`grid ${getGridCols()} ${getGapSize()} w-full ${getCardSize()}`} style={{ minHeight: '1px' }}>
+        <div className={`${getContainerHeight()} w-full flex items-center justify-center overflow-y-auto py-2`}>
+          <div className={`grid ${getGridCols()} ${getGapSize()} w-full ${getCardSize()}`} 
+               style={{ 
+                 minHeight: '1px',
+                 alignContent: 'start' // 確保卡片從頂部開始排列
+               }}>
             {cards.map((card) => (
               <MemoryCard
                 key={card.id}
