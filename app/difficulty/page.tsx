@@ -5,16 +5,21 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { difficulties, themes } from "@/lib/mockData/data"
+import { Slider } from "@/components/ui/slider"
+import { difficulties, themes, previewTimerSettings } from "@/lib/mockData/data"
 
 export default function DifficultyPage() {
   const router = useRouter()
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
   const [themeObj, setThemeObj] = useState<any>(null)
+  const [previewTime, setPreviewTime] = useState<number>(previewTimerSettings.default)
 
   useEffect(() => {
     // 獲取從主題頁面選擇的主題
     const theme = localStorage.getItem("selectedTheme")
+    // 讀取已保存的倒數時間設置（如果有）
+    const savedPreviewTime = localStorage.getItem("previewTime")
+    
     if (theme) {
       setSelectedTheme(theme)
       const foundTheme = themes.find(t => t.name === theme)
@@ -25,11 +30,18 @@ export default function DifficultyPage() {
       // 如果沒有選擇主題，返回主題選擇頁面
       router.push("/themes")
     }
+    
+    // 設置倒數時間，如果有保存則使用保存的值，否則使用默認值
+    if (savedPreviewTime) {
+      setPreviewTime(parseInt(savedPreviewTime))
+    }
   }, [router])
 
   const handleSelectDifficulty = (difficultyId: number) => {
     // 儲存選擇的難度
     localStorage.setItem("selectedDifficulty", String(difficultyId))
+    // 儲存預覽倒數時間
+    localStorage.setItem("previewTime", String(previewTime))
     // 導向遊戲頁面
     router.push("/game")
   }
@@ -58,6 +70,27 @@ export default function DifficultyPage() {
             </div>
           </Card>
         )}
+        
+        {/* 倒數秒數設置 */}
+        <Card className="w-full p-6 bg-yellow-100 backdrop-blur-sm rounded-3xl shadow-lg border-2 border-yellow-300">
+          <h3 className="text-xl font-bold text-yellow-800 mb-3">記憶倒數時間</h3>
+          <div className="flex flex-col gap-3">
+            <div className="flex justify-between items-center text-sm text-yellow-700">
+              <span>{previewTimerSettings.min}秒</span>
+              <span className="font-bold text-2xl text-yellow-800">{previewTime}秒</span>
+              <span>{previewTimerSettings.max}秒</span>
+            </div>
+            <Slider
+              value={[previewTime]}
+              min={previewTimerSettings.min}
+              max={previewTimerSettings.max}
+              step={1}
+              onValueChange={(value) => setPreviewTime(value[0])}
+              className="py-2"
+            />
+            <p className="text-sm text-yellow-700 text-center mt-1">設置記住卡片的倒數秒數，時間越短難度越高</p>
+          </div>
+        </Card>
 
         <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
           {difficulties.map((difficulty) => {

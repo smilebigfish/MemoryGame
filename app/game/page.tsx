@@ -7,7 +7,8 @@ import { MemoryCard } from "@/components/game/memory-card"
 import { GameTimer } from "@/components/game/game-timer"
 import { PreviewCountdown } from "@/components/game/preview-countdown"
 import { GameResult } from "@/components/game/game-result"
-import { useMemoryGame } from "@/hooks/useMemoryGame"
+import { MemoryAlert } from "@/components/game/memory-alert"
+import { useMemoryGame, GamePhase } from "@/hooks/useMemoryGame"
 import { difficulties } from "@/lib/mockData/data"
 
 export default function GamePage() {
@@ -27,10 +28,13 @@ export default function GamePage() {
     selectedDifficulty,
     difficultyPairs,
     currentThemeObj,
+    previewTime,
+    gamePhase,
     handleChoice,
     shuffleCards,
     resetGame,
-    endPreview
+    endPreview,
+    startPreview
   } = useMemoryGame()
 
   // 計算網格布局 - 根據難度調整列數
@@ -88,12 +92,22 @@ export default function GamePage() {
         turns={turns}
         onPlayAgain={resetGame}
         onGoHome={() => router.push("/")}
+        onBackToThemes={() => router.push("/themes")}
       />
     )
   }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-start p-2 sm:p-3 bg-gradient-to-b from-[#FFF5E1] to-[#D0F0F0]">
+      {/* 初始彈窗提示 */}
+      {gamePhase === GamePhase.INITIAL_ALERT && (
+        <MemoryAlert 
+          previewTime={previewTime} 
+          onComplete={startPreview} 
+          showDuration={3} 
+        />
+      )}
+
       <div className="w-full max-w-[95vw] 2xl:max-w-[85vw] flex flex-col">
         <div className="flex flex-wrap justify-between items-center w-full gap-2 mb-1">
           <Button onClick={() => router.push("/")} className="rounded-full bg-[#FF6F61] hover:bg-[#FF5A4C] text-white px-2 py-0.5 h-7 text-xs sm:text-sm">
@@ -120,21 +134,23 @@ export default function GamePage() {
           </div>
         </div>
 
-        {isPreview ? (
+        {gamePhase === GamePhase.PREVIEW ? (
           <PreviewCountdown 
-            initialCount={10} 
+            initialCount={previewTime} 
             onComplete={endPreview}
             className="mb-1" 
           />
-        ) : (
+        ) : gamePhase === GamePhase.PLAYING ? (
           <div className="w-full flex justify-between items-center px-1 mb-1">
             <p className="text-xs text-[#6B4226]">回合數：<span className="font-bold">{turns}</span></p>
             <GameTimer 
-              isRunning={!gameComplete && !isPreview} 
+              isRunning={true} 
               startTime={startTime}
               className="text-xs sm:text-sm" 
             />
           </div>
+        ) : (
+          <div className="w-full h-6 mb-1"></div> // 空白佔位，保持佈局一致
         )}
 
         <div className={`${getContainerHeight()} overflow-hidden flex items-center justify-center w-full`}>
@@ -143,9 +159,13 @@ export default function GamePage() {
               <MemoryCard
                 key={card.id}
                 card={card}
-                flipped={isPreview || card === choiceOne || card === choiceTwo || card.matched}
+                flipped={
+                  gamePhase === GamePhase.INITIAL_ALERT ? false :
+                  gamePhase === GamePhase.PREVIEW ? true :
+                  card === choiceOne || card === choiceTwo || card.matched
+                }
                 handleChoice={handleChoice}
-                disabled={disabled || isPreview}
+                disabled={gamePhase !== GamePhase.PLAYING || disabled}
                 themeColor={`from-${currentThemeObj.color.split('-')[1]} to-${currentThemeObj.color.split('-')[1]}-400`}
                 textColor={currentThemeObj.cardTextColor}
                 borderColor={currentThemeObj.borderColor}

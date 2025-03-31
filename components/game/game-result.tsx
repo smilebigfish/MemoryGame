@@ -8,9 +8,10 @@ interface GameResultProps {
   turns: number;
   onPlayAgain: () => void;
   onGoHome: () => void;
+  onBackToThemes?: () => void;
 }
 
-export function GameResult({ gameTime, turns, onPlayAgain, onGoHome }: GameResultProps) {
+export function GameResult({ gameTime, turns, onPlayAgain, onGoHome, onBackToThemes }: GameResultProps) {
   // 格式化時間
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -46,13 +47,22 @@ export function GameResult({ gameTime, turns, onPlayAgain, onGoHome }: GameResul
             </div>
           </div>
 
-          <div className="flex gap-2 sm:gap-3 mt-1">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mt-1 justify-center">
             <Button
               onClick={onPlayAgain}
               className="h-8 sm:h-9 px-3 text-sm rounded-full bg-[#6FCF97] hover:bg-[#5DBF87] text-[#4A4A4A]"
             >
               再玩一次
             </Button>
+
+            {onBackToThemes && (
+              <Button
+                onClick={onBackToThemes}
+                className="h-8 sm:h-9 px-3 text-sm rounded-full bg-[#A2D2FF] hover:bg-[#8BC0F0] text-[#4A4A4A]"
+              >
+                返回主題
+              </Button>
+            )}
 
             <Button
               onClick={onGoHome}

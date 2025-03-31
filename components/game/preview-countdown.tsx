@@ -11,6 +11,11 @@ interface PreviewCountdownProps {
 export function PreviewCountdown({ initialCount, onComplete, className = "" }: PreviewCountdownProps) {
   const [count, setCount] = useState(initialCount);
 
+  // 當 initialCount 變化時更新 count
+  useEffect(() => {
+    setCount(initialCount);
+  }, [initialCount]);
+
   useEffect(() => {
     // 創建倒計時邏輯
     const timer = setInterval(() => {
@@ -25,7 +30,7 @@ export function PreviewCountdown({ initialCount, onComplete, className = "" }: P
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [initialCount, onComplete]);
+  }, [onComplete]); // 移除 initialCount 依賴，因為我們在上面的 useEffect 中處理了
 
   return (
     <div className={`bg-[#FFE599] py-1 px-2 rounded-lg text-center w-full ${className}`}>
